@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OGTT Weekly Recap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="../app.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ogtt-green: #9aff03;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --card-border: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --negative: #ff3b5c;
+            --positive: #9aff03;
+            --neutral: #ffffff;
+            --danger: #ff3b5c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        .title-section {
+            position: relative;
+        }
+
+        .weekly-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: var(--ogtt-green);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            letter-spacing: 4px;
+            line-height: 0.9;
+            background: linear-gradient(180deg, #ffffff 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .date-range {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .date-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--card-border);
+            color: var(--ogtt-green);
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 300;
+            text-align: center;
+            padding: 2px 8px;
+            width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:hover,
+        .date-input:focus {
+            border-bottom-color: var(--ogtt-green);
+            outline: none;
+        }
+
+        /* Decorative line */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), var(--ogtt-green), var(--card-border), transparent);
+            margin: 40px 0;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 10px 20px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: var(--ogtt-green);
+            background: rgba(154, 255, 3, 0.1);
+        }
+
+        .btn-add {
+            border-color: var(--ogtt-green);
+            color: var(--ogtt-green);
+        }
+
+        .btn-add:hover {
+            background: var(--ogtt-green);
+            color: var(--dark-bg);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .player-row {
+            display: grid;
+            grid-template-columns: 50px 1fr auto 40px;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px 20px 16px 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        .player-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .player-row.positive::before {
+            background: var(--positive);
+        }
+
+        .player-row.negative::before {
+            background: var(--negative);
+        }
+
+        .player-row:hover {
+            transform: translateX(4px);
+        }
+
+        .player-row:hover::before {
+            width: 5px;
+        }
+
+        .rank {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--text-secondary);
+        }
+
+        .player-row.top-3 .rank {
+            color: var(--ogtt-green);
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .player-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            padding: 2px 0;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .player-input:hover,
+        .player-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-left: -6px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .player-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .units-wrapper {
+            text-align: right;
+        }
+
+        .units-input {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 1px;
+            background: transparent;
+            border: none;
+            text-align: right;
+            width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .units-input:hover,
+        .units-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .units-input.positive {
+            color: var(--positive);
+        }
+
+        .units-input.negative {
+            color: var(--negative);
+        }
+
+        .units-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 59, 92, 0.2);
+            color: var(--danger);
+        }
+
+        .delete-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Total Section */
+        .total-section {
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(154, 255, 3, 0.1) 0%, rgba(154, 255, 3, 0.02) 100%);
+            border: 2px solid var(--ogtt-green);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(154, 255, 3, 0.08) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .total-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 6px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .total-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 64px;
+            color: var(--ogtt-green);
+            position: relative;
+            text-shadow: 0 0 40px rgba(154, 255, 3, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .total-value.negative {
+            color: var(--negative);
+            text-shadow: 0 0 40px rgba(255, 59, 92, 0.4);
+        }
+
+        .total-suffix {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .removing {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-wrapper">
+                <!-- OGTT Logo as SVG -->
+                <svg class="logo" viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M0 10 C0 0, 15 0, 40 0 L50 0 C75 0, 90 0, 90 10 L90 70 C90 80, 75 80, 50 80 L40 80 C15 80, 0 80, 0 70 Z M20 20 L20 60 C20 65, 25 65, 35 65 L55 65 C65 65, 70 65, 70 60 L70 20 C70 15, 65 15, 55 15 L35 15 C25 15, 20 15, 20 20 Z"
+                        fill="white" />
+                    <path
+                        d="M100 10 C100 0, 115 0, 140 0 L180 0 L180 18 L130 18 C120 18, 120 20, 120 25 L120 55 C120 60, 120 62, 130 62 L160 62 L160 45 L140 45 L140 30 L180 30 L180 70 C180 80, 165 80, 140 80 L130 80 C105 80, 100 80, 100 70 Z"
+                        fill="white" />
+                    <path d="M190 0 L280 0 L280 18 L245 18 L245 80 L225 80 L225 18 L190 18 Z" fill="white" />
+                    <path d="M252 0 L268 0 L245 35 L245 18 L252 18 Z" fill="#0a0a0a" />
+                    <path d="M290 0 L400 0 L400 18 L355 18 L355 80 L335 80 L335 18 L290 18 Z" fill="#9aff03" />
+                </svg>
+            </div>
+            <div class="title-section">
+                <div class="weekly-label">Weekly</div>
+                <h1 class="title">RECAP</h1>
+                <div class="date-range">
+                    <input type="text" class="date-input" id="startDate" value="Jan 12">
+                    <span>—</span>
+                    <input type="text" class="date-input" id="endDate" value="Jan 18, 2026">
+                </div>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-add" id="addRowBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Capper
+            </button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard" id="leaderboard">
+            <!-- Rows will be dynamically generated -->
+        </div>
+
+        <!-- Total Section -->
+        <div class="total-section">
+            <div class="total-label">Server Combined</div>
+            <div class="total-value" id="totalValue">
+                <span id="totalUnits">+0.00</span>
+                <span class="total-suffix">UNITS</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">OGTT • Elite Sports Analytics</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

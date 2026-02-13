@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OGTT Daily Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ogtt-green: #9aff03;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --card-border: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --negative: #ff3b5c;
+            --positive: #9aff03;
+            --neutral: #ffffff;
+            --glow-green: rgba(154, 255, 3, 0.6);
+            --glow-red: rgba(255, 59, 92, 0.6);
+        }
+
+        @font-face {
+            font-family: 'Ethnocentric';
+            src: url('../fonts/Ethnocentric-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        .title-section {
+            position: relative;
+        }
+
+        .monthly-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: var(--ogtt-green);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            letter-spacing: 4px;
+            line-height: 0.9;
+            background: linear-gradient(180deg, #ffffff 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), var(--ogtt-green), var(--card-border), transparent);
+            margin: 40px 0;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .upload-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 16px 32px;
+            border: 2px dashed var(--ogtt-green);
+            border-radius: 12px;
+            background: rgba(154, 255, 3, 0.05);
+            color: var(--ogtt-green);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-btn:hover {
+            background: rgba(154, 255, 3, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(154, 255, 3, 0.2);
+        }
+
+        .upload-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        #csvInput {
+            display: none;
+        }
+
+        .results-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .month-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease forwards;
+            animation-delay: calc(var(--index) * 0.1s);
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .month-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .month-card.positive::before {
+            background: var(--positive);
+            box-shadow: 0 0 20px var(--glow-green);
+        }
+
+        .month-card.negative::before {
+            background: var(--negative);
+            box-shadow: 0 0 20px var(--glow-red);
+        }
+
+        .month-card:hover {
+            transform: translateX(4px);
+            border-color: var(--ogtt-green);
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+
+        .month-year {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .outcome-section {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            border: 1px solid #9aff0367;
+            /* background: linear-gradient(135deg, rgba(154, 255, 3, 0.15) 0%, rgba(154, 255, 3, 0.02) 100%); */
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .outcome-section.negative {
+            background: linear-gradient(135deg, rgba(255, 59, 92, 0.15) 0%, rgba(255, 59, 92, 0.02) 100%);
+        }
+
+      /*   .outcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(154, 255, 3, 0.1) 0%, transparent 50%);
+            animation: pulse 3s ease-in-out infinite;
+        } */
+
+        .outcome-section.negative::before {
+            background: radial-gradient(circle, rgba(255, 59, 92, 0.1) 0%, transparent 50%);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .outcome-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 16px;
+            letter-spacing: 6px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .outcome-value {
+            font-family: 'Ethnocentric', sans-serif;
+            font-size: 70px;
+            position: relative;
+            /* animation: glow 2s ease-in-out infinite alternate; */
+        }
+
+        .outcome-value.positive {
+            color: var(--positive);
+            text-shadow: 0 0 0px var(--glow-green), 0 0 160px var(--glow-green);
+        }
+
+        .outcome-value.negative {
+            color: var(--negative);
+            text-shadow: 0 0 30px var(--glow-red), 0 0 60px var(--glow-red);
+        }
+
+        @keyframes glow {
+            from {
+                filter: brightness(1);
+            }
+
+            to {
+                filter: brightness(1.2);
+            }
+        }
+
+        .outcome-suffix {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            border-color: var(--ogtt-green);
+            background: rgba(154, 255, 3, 0.05);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+
+        .stat-value.wins {
+            color: var(--positive);
+        }
+
+        .stat-value.losses {
+            color: var(--negative);
+        }
+
+        .stat-value.total {
+            color: var(--text-primary);
+        }
+
+        .total-section {
+            margin-top: 40px;
+            background: linear-gradient(135deg, rgba(154, 255, 3, 0.12) 0%, rgba(154, 255, 3, 0.02) 100%);
+            border: 2px solid var(--ogtt-green);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(154, 255, 3, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .total-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 16px;
+            letter-spacing: 8px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .total-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 80px;
+            position: relative;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .total-value.positive {
+            color: var(--positive);
+            text-shadow: 0 0 40px var(--glow-green), 0 0 80px var(--glow-green);
+        }
+
+        .total-value.negative {
+            color: var(--negative);
+            text-shadow: 0 0 40px var(--glow-red), 0 0 80px var(--glow-red);
+        }
+
+        .total-suffix {
+            font-size: 28px;
+            opacity: 0.7;
+        }
+
+        .total-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 24px;
+            position: relative;
+        }
+
+        .total-stat {
+            text-align: center;
+        }
+
+        .total-stat-label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .total-stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+        }
+
+        .total-stat-value.wins {
+            color: var(--positive);
+        }
+
+        .total-stat-value.losses {
+            color: var(--negative);
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.4;
+            color: var(--ogtt-green);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state .hint {
+            font-size: 13px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-wrapper">
+                <img src="/images/hotizontal-ogtt-logo-white.png" width="300"/>
+
+            </div>
+            <div class="title-section">
+                <div class="monthly-label">Daily</div>
+                <h1 class="title">RESULTS</h1>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <div class="upload-section">
+            <label class="upload-btn" for="csvInput">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Upload CSV File
+            </label>
+            <input type="file" id="csvInput" accept=".csv">
+        </div>
+
+        <div class="results-grid" id="resultsGrid">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M9 17H7A5 5 0 0 1 7 7h2"></path>
+                    <path d="M15 7h2a5 5 0 0 1 0 10h-2"></path>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <p>No data loaded yet</p>
+                <p class="hint">Upload a CSV file to see your daily results</p>
+            </div>
+        </div>
+
+        <div class="total-section" id="totalSection" style="display: none;">
+            <div class="total-label">All Time Combined</div>
+            <div class="total-value positive" id="totalValue">
+                <span id="totalUnits">+0</span>
+                <span class="total-suffix">UNITS</span>
+            </div>
+            <div class="total-stats">
+                <div class="total-stat">
+                    <div class="total-stat-label">Total Wins</div>
+                    <div class="total-stat-value wins" id="totalWins">0</div>
+                </div>
+                <div class="total-stat">
+                    <div class="total-stat-label">Total Losses</div>
+                    <div class="total-stat-value losses" id="totalLosses">0</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p class="footer-text">OGTT • Elite Sports Analytics</p>
+        </footer>
+    </div>
+
+    <script>
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        document.getElementById('csvInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const csvData = event.target.result;
+                    processCSV(csvData);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function processCSV(csvData) {
+            const lines = csvData.split('\n');
+            const dailyData = {};
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                const fields = parseCSVLine(line);
+                if (fields.length < 10) continue; // need A..J at least
+
+                const dateStr = fields[0];     // A: Start Time/date
+                const tournament = fields[1];  // B: Tournament
+                const players = fields[2];     // C: Players
+                const hitFlag = fields[5];     // F: TRUE/FALSE win/loss
+                const playType = fields[9];    // J: Play Type / time
+
+                const dateMatch = dateStr.match(/(\w+)\s+(\d+),\s+(\d{4})/);
+                if (!dateMatch) continue;
+
+                const monthAbbrev = dateMatch[1];
+                const day = dateMatch[2].padStart(2, '0');
+                const year = dateMatch[3];
+                const fullMonthName = getFullMonthName(monthAbbrev);
+                const monthIndex = monthNames.indexOf(fullMonthName) + 1;
+                const key = `${year}-${monthIndex}-${day}`;
+                const label = `${fullMonthName} ${day}, ${year}`;
+
+                if (!dailyData[key]) {
+                    dailyData[key] = {
+                        label,
+                        year,
+                        monthName: fullMonthName,
+                        day,
+                        wins: 0,
+                        losses: 0,
+                        bets: [],
+                        tournamentSummary: {} // tournament -> {wins, losses}
+                    };
+                }
+
+                let outcome = null;
+                let isWin = false;
+                let isLoss = false;
+
+                if (hitFlag.toUpperCase() === 'TRUE') {
+                    dailyData[key].wins += 1;
+                    isWin = true;
+                    outcome = 'WIN';
+                } else if (hitFlag.toUpperCase() === 'FALSE') {
+                    dailyData[key].losses += 1;
+                    isLoss = true;
+                    outcome = 'LOSS';
+                }
+
+                // Tournament summary
+                if (!dailyData[key].tournamentSummary[tournament]) {
+                    dailyData[key].tournamentSummary[tournament] = { wins: 0, losses: 0 };
+                }
+                if (isWin) dailyData[key].tournamentSummary[tournament].wins += 1;
+                if (isLoss) dailyData[key].tournamentSummary[tournament].losses += 1;
+
+                // Store detailed bet
+                dailyData[key].bets.push({
+                    tournament,
+                    players,
+                    playType,
+                    outcome
+                });
+            }
+
+            renderResults(dailyData);
+        }
+
+        function getFullMonthName(abbrev) {
+            const map = {
+                'Jan': 'January', 'Feb': 'February', 'Mar': 'March', 'Apr': 'April',
+                'May': 'May', 'Jun': 'June', 'Jul': 'July', 'Aug': 'August',
+                'Sep': 'September', 'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+            };
+            return map[abbrev] || abbrev;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+
+            return result;
+        }
+
+        function renderResults(dailyData) {
+            const grid = document.getElementById('resultsGrid');
+            const totalSection = document.getElementById('totalSection');
+
+            const days = Object.keys(dailyData);
+            if (days.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p>No valid data found in CSV</p>
+                        <p class="hint">Make sure your CSV has the correct format</p>
+                    </div>
+                `;
+                totalSection.style.display = 'none';
+                return;
+            }
+
+            days.sort((a, b) => new Date(a) - new Date(b));
+
+            let html = '';
+            let totalWins = 0;
+            let totalLosses = 0;
+            let index = 0;
+
+            for (const key of days) {
+                const data = dailyData[key];
+                const units = data.wins - data.losses;
+                const isPositive = units >= 0;
+                const unitStr = isPositive ? `+${units}` : `${units}`;
+                const total = data.wins + data.losses;
+
+                totalWins += data.wins;
+                totalLosses += data.losses;
+
+                // Tournament recap: "TT Elite Series: X - Y"
+                const tournamentEntries = Object.entries(data.tournamentSummary);
+                const recapHtml = tournamentEntries.map(([tName, stats]) => {
+                    return `
+                        <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;">
+                            <div style="color:#ffffff;">${tName}</div>
+                            <div style="color:#9aff03;font-weight:600;">${stats.wins} - <span style="color:red;">${stats.losses}</span></div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Detailed bets list
+                const betsHtml = data.bets.map(bet => `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-top:1px solid #1f1f1f;font-size:13px;">
+                        <div>
+                            <div style="color: ${bet.outcome.toLowerCase() === 'loss' ? '#ff3b5c' : '#9aff03'}; font-weight:600;">
+                                ${bet.outcome || ''}
+                            </div>
+                            <div style="color:#888;">${bet.tournament}</div>
+                            <div>${bet.players}</div>
+                        </div>
+                        <div style="text-align:right;color:#ccc;">${bet.playType}</div>
+                    </div>
+                `).join('');
+
+                html += `
+                    <div class="month-card ${isPositive ? 'positive' : 'negative'}" style="--index: ${index}">
+                        <div class="month-header">
+                            <div>
+                                <div class="month-name">${data.label}</div>
+                                <div class="month-year">${data.year}</div>
+                            </div>
+                            <div>
+                             <img src="/images/hotizontal-ogtt-logo-white.png" width="300"/>
+                            </div>
+                        </div>
+    
+    
+                        
+                        <div class="stats-row" style="margin-bottom:16px;">
+                            
+                            <div class="stat-box">
+                                <div class="stat-label">Wins</div>
+                                <div class="stat-value wins">${data.wins}W</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Losses</div>
+                                <div class="stat-value losses" style="color:red;">${data.losses}L</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Total Plays</div>
+                                <div class="stat-value total">${total}</div>
+                            </div>
+                        </div>
+
+
+                        <div class="outcome-section ${isPositive ? '' : 'negative'}">
+                            <div class="outcome-label">OUTCOME</div>
+                            <div class="outcome-value ${isPositive ? 'positive' : 'negative'}">
+                                ${unitStr}
+                                <span class="outcome-suffix">UNITS</span>
+                            </div>
+                        </div>
+    
+                        <!-- Tournament recap for screenshot-friendly summary -->
+                        <div style="margin-top:4px;margin-bottom:12px;border:1px solid #1f1f1f;border-radius:10px;padding:10px;background:rgba(255,255,255,0.02);">
+                            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:6px;">
+                                Recap by Tournament
+                            </div>
+                            ${recapHtml}
+                        </div>
+    
+                        <!-- Per-bet details (can be scrolled or cropped out of screenshot) -->
+                        <div style="margin-top:8px;max-height:260px;overflow-y:auto;">
+                            ${betsHtml}
+                        </div>
+                    </div>
+                `;
+                index++;
+            }
+
+            grid.innerHTML = html;
+
+            const totalUnits = totalWins - totalLosses;
+            const isPositiveTotal = totalUnits >= 0;
+            const totalStr = isPositiveTotal ? `+${totalUnits}` : `${totalUnits}`;
+
+            document.getElementById('totalUnits').textContent = totalStr;
+            document.getElementById('totalWins').textContent = totalWins;
+            document.getElementById('totalLosses').textContent = totalLosses;
+
+            const totalValueEl = document.getElementById('totalValue');
+            totalValueEl.classList.remove('positive', 'negative');
+            totalValueEl.classList.add(isPositiveTotal ? 'positive' : 'negative');
+
+            totalSection.style.display = 'block';
+        }
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OGTT Weekly Recap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ogtt-green: #9aff03;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --card-border: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --negative: #ff3b5c;
+            --positive: #9aff03;
+            --neutral: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        .title-section {
+            position: relative;
+        }
+
+        .weekly-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: var(--ogtt-green);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            letter-spacing: 4px;
+            line-height: 0.9;
+            background: linear-gradient(180deg, #ffffff 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .date-range {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .date-range span {
+            color: var(--ogtt-green);
+        }
+
+        /* Decorative line */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), var(--ogtt-green), var(--card-border), transparent);
+            margin: 40px 0;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .player-row {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--row-accent, var(--card-border));
+            transition: width 0.3s ease;
+        }
+
+        .player-row:hover {
+            border-color: var(--row-accent, var(--card-border));
+            transform: translateX(4px);
+        }
+
+        .player-row:hover::before {
+            width: 5px;
+        }
+
+        .player-row.positive::before {
+            background: var(--positive);
+        }
+
+        .player-row.negative::before {
+            background: var(--negative);
+        }
+
+        .player-row.neutral::before {
+            background: var(--neutral);
+        }
+
+        .rank {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: var(--text-secondary);
+        }
+
+        .player-row.top-3 .rank {
+            color: var(--ogtt-green);
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .player-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .units {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 1px;
+        }
+
+        .units.positive {
+            color: var(--positive);
+        }
+
+        .units.negative {
+            color: var(--negative);
+        }
+
+        .units.neutral {
+            color: var(--neutral);
+        }
+
+        .units-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+
+        /* Total Section */
+        .total-section {
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(154, 255, 3, 0.1) 0%, rgba(154, 255, 3, 0.02) 100%);
+            border: 2px solid var(--ogtt-green);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(154, 255, 3, 0.08) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .total-label {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 14px;
+            letter-spacing: 6px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .total-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 64px;
+            color: var(--ogtt-green);
+            position: relative;
+            text-shadow: 0 0 40px rgba(154, 255, 3, 0.4);
+        }
+
+        .total-suffix {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Editable hint */
+        [contenteditable="true"]:hover {
+            outline: 1px dashed var(--ogtt-green);
+            outline-offset: 4px;
+        }
+
+        [contenteditable="true"]:focus {
+            outline: 2px solid var(--ogtt-green);
+            outline-offset: 4px;
+        }
+
+        /* Animation */
+        .player-row {
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .player-row:nth-child(1) { animation-delay: 0.1s; }
+        .player-row:nth-child(2) { animation-delay: 0.15s; }
+        .player-row:nth-child(3) { animation-delay: 0.2s; }
+        .player-row:nth-child(4) { animation-delay: 0.25s; }
+        .player-row:nth-child(5) { animation-delay: 0.3s; }
+        .player-row:nth-child(6) { animation-delay: 0.35s; }
+        .player-row:nth-child(7) { animation-delay: 0.4s; }
+        .player-row:nth-child(8) { animation-delay: 0.45s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-wrapper">
+                <!-- OGTT Logo as SVG recreation -->
+                <svg class="logo" viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+                    <!-- O -->
+                    <path d="M0 10 C0 0, 15 0, 40 0 L50 0 C75 0, 90 0, 90 10 L90 70 C90 80, 75 80, 50 80 L40 80 C15 80, 0 80, 0 70 Z M20 20 L20 60 C20 65, 25 65, 35 65 L55 65 C65 65, 70 65, 70 60 L70 20 C70 15, 65 15, 55 15 L35 15 C25 15, 20 15, 20 20 Z" fill="white"/>
+                    <!-- G -->
+                    <path d="M100 10 C100 0, 115 0, 140 0 L180 0 L180 18 L130 18 C120 18, 120 20, 120 25 L120 55 C120 60, 120 62, 130 62 L160 62 L160 45 L140 45 L140 30 L180 30 L180 70 C180 80, 165 80, 140 80 L130 80 C105 80, 100 80, 100 70 Z" fill="white"/>
+                    <!-- T (first, with diagonal cut) -->
+                    <path d="M190 0 L280 0 L280 18 L245 18 L245 80 L225 80 L225 18 L190 18 Z" fill="white"/>
+                    <!-- Diagonal cut overlay -->
+                    <path d="M252 0 L268 0 L245 35 L245 18 L252 18 Z" fill="#0a0a0a"/>
+                    <!-- T (second, green) -->
+                    <path d="M290 0 L400 0 L400 18 L355 18 L355 80 L335 80 L335 18 L290 18 Z" fill="#9aff03"/>
+                </svg>
+            </div>
+            <div class="title-section">
+                <div class="weekly-label">Weekly</div>
+                <h1 class="title">RECAP</h1>
+                <p class="date-range"><span contenteditable="true">Jan 12</span> — <span contenteditable="true">Jan 18, 2026</span></p>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <!-- Leaderboard -->
+        <div class="leaderboard">
+            <!-- Row 1 - MarshyPicks -->
+            <div class="player-row positive top-3" style="--row-accent: var(--positive);">
+                <div class="rank">01</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@MarshyPicks</span>
+                    <span class="player-role" contenteditable="true">Lead Analyst</span>
+                </div>
+                <div class="units positive">
+                    <span contenteditable="true">+173.27</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="player-row positive top-3" style="--row-accent: var(--positive);">
+                <div class="rank">02</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper01</span>
+                    <span class="player-role" contenteditable="true">NBA Specialist</span>
+                </div>
+                <div class="units positive">
+                    <span contenteditable="true">+19.37</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="player-row positive top-3" style="--row-accent: var(--positive);">
+                <div class="rank">03</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper02</span>
+                    <span class="player-role" contenteditable="true">NFL Expert</span>
+                </div>
+                <div class="units positive">
+                    <span contenteditable="true">+8.67</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="player-row positive" style="--row-accent: var(--positive);">
+                <div class="rank">04</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper03</span>
+                    <span class="player-role" contenteditable="true">MMA Specialist</span>
+                </div>
+                <div class="units positive">
+                    <span contenteditable="true">+4.62</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 5 -->
+            <div class="player-row positive" style="--row-accent: var(--positive);">
+                <div class="rank">05</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper04</span>
+                    <span class="player-role" contenteditable="true">Props Expert</span>
+                </div>
+                <div class="units positive">
+                    <span contenteditable="true">+4.38</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 6 -->
+            <div class="player-row neutral" style="--row-accent: var(--neutral);">
+                <div class="rank">06</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper05</span>
+                    <span class="player-role" contenteditable="true">Soccer Analyst</span>
+                </div>
+                <div class="units neutral">
+                    <span contenteditable="true">+1.59</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 7 - Negative -->
+            <div class="player-row negative" style="--row-accent: var(--negative);">
+                <div class="rank">07</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper06</span>
+                    <span class="player-role" contenteditable="true">NHL Expert</span>
+                </div>
+                <div class="units negative">
+                    <span contenteditable="true">-2.37</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+
+            <!-- Row 8 - Negative -->
+            <div class="player-row negative" style="--row-accent: var(--negative);">
+                <div class="rank">08</div>
+                <div class="player-info">
+                    <span class="player-name" contenteditable="true">@Capper07</span>
+                    <span class="player-role" contenteditable="true">Tennis Analyst</span>
+                </div>
+                <div class="units negative">
+                    <span contenteditable="true">-2.45</span>
+                    <span class="units-label">UNITS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Section -->
+        <div class="total-section">
+            <div class="total-label">Server Combined</div>
+            <div class="total-value">
+                <span contenteditable="true">+207.08</span>
+                <span class="total-suffix">UNITS</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">OGTT • Elite Sports Analytics</p>
+        </footer>
+    </div>
+</body>
+</html>
